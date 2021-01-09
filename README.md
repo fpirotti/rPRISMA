@@ -2,6 +2,8 @@
 
 Converts [PRISMA](https://earth.esa.int/web/eoportal/satellite-missions/p/prisma-hyperspectral){target=_blank} hyperspectral satellite dataset, which is provided in HDF5 format, in GeoTIFF images.
 
+**NOT YET TESTED**
+
 ## Usage
 
     PRISMA2geotiff("path-to-HDF5-file.he5", overwrite=T/F) 
