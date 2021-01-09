@@ -3,7 +3,7 @@ Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Francesco",
-           family = "Pirotti",
+           family = "Pirotti",  
            role = c("aut", "cre"),
            email = "francesco.pirotti@unipd.it",
            comment = c(ORCID = "0000-0002-4796-6406"))
