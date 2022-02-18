@@ -2,25 +2,24 @@
 % Please edit documentation in R/read.R
 \name{PRISMA2rast}
 \alias{PRISMA2rast}
-\title{PRISMA2rast}
+\title{PRISMA2rast
+Reads PRISMA data and saves to a terra::rast object}
 \usage{
-PRISMA2rast(filepath)
+PRISMA2rast(filepath, verbose = F)
 }
 \arguments{
-\item{filepath}{the filepath to HDF PRISMA dataset}
+\item{filepath}{text of the filepath to HDF PRISMA dataset}
+
+\item{verbose}{boolean - lot's of messages if True}
 }
 \value{
 A list object with
 \itemize{
-\item swir - raster::brick object
-\item vnir - raster::brick object
+\item swir - terra::rast object
+\item vnir - terra::rast object
 }
 }
 \description{
 PRISMA2rast
-}
-\examples{
-### filepath<-"/archivio/shared/geodati/raster/
-## OPTICAL/PRISMA/PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-### fn <- PRISMA2rast(filepath)
+Reads PRISMA data and saves to a terra::rast object
 }

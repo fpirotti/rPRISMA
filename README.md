@@ -2,7 +2,9 @@
 
 Converts [PRISMA](https://earth.esa.int/web/eoportal/satellite-missions/p/prisma-hyperspectral){target=_blank} hyperspectral satellite dataset, which is provided in HDF5 format, in GeoTIFF images.
 
-**NOT YET TESTED**
+You are welcome to beta-test!
+
+NB: terra library version >1.5 is required
 
 ## Usage
 
@@ -12,7 +14,7 @@ will write two files, one for the VNIR cube and SWIR  cube, repsectively with th
 
     PRISMA2rast("path-to-HDF5-file.he5")  
     
-will provide you with a list with 2 elements of raster::brick type
+will provide you with a list with 2 elements of terra::rast type
 
 ## Installation    
 

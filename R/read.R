@@ -2,56 +2,58 @@
 #'
 #' @param filepath the filepath to HDF PRISMA dataset
 #' @param overwrite Do you want to overwrite automatically any existing Geotiff file?
+#' @param verbose boolean - lot's of messages if True
 #'
 #' @return logical TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
 #'  XXX.he5 will be  XXX_VNIR.tif and XXX_SWIR.tif
 #' @export
 #'
 #' @examples
-#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/
+#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
 #' ### PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
 #' ### fn <- PRISMA2geotiff(filepath)
-PRISMA2geotiff<-function(filepath, overwrite=F){
+PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
   dn<-dirname(filepath)
   bn<-basename(filepath)
-  raster::extension(bn)<-""
+  bn<-tools::file_path_sans_ext(bn)
 
-  bricks<-PRISMA2rast(filepath)
+  bricks<-PRISMA2rast(filepath, verbose=verbose)
 
   vnir.out<-file.path(dn, paste(bn, "_VNIR.tif", sep=""))
   swir.out<-file.path(dn, paste(bn, "_SWIR.tif", sep=""))
   message("Writing ", vnir.out)
-  raster::writeRaster(bricks[["vnir"]], vnir.out, overwrite=overwrite)
+  terra::writeRaster(bricks[["vnir"]], vnir.out, overwrite=overwrite)
   message("Writing ", swir.out)
-  raster::writeRaster(bricks[["swir"]], swir.out, overwrite=overwrite)
+  terra::writeRaster(bricks[["swir"]], swir.out, overwrite=overwrite)
 }
 
 
 
 #' PRISMA2rast
-#'
-#' @param filepath the filepath to HDF PRISMA dataset
+#' Reads PRISMA data and saves to a terra::rast object
+#' @param filepath text of the filepath to HDF PRISMA dataset
+#' @param verbose boolean - lot's of messages if True
 #'
 #' @return A list object with
 #' \itemize{
-#'   \item swir - raster::brick object
-#'   \item vnir - raster::brick object
+#'   \item swir - terra::rast object
+#'   \item vnir - terra::rast object
 #' }
 #'
 #' @export
 #'
 #' @examples
-#' ### filepath<-"/archivio/shared/geodati/raster/
-#' ## OPTICAL/PRISMA/PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-#' ### fn <- PRISMA2rast(filepath)
-PRISMA2rast<-function(filepath){
+#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/
+#' PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
+#' ### fn <- PRISMA2rast(filepath, verbose=T)
+PRISMA2rast<-function(filepath, verbose=F){
 
   if(!file.exists(filepath)){
     warning("File does not exist")
     return(NULL)
   }
-
-  if(!tolower(raster::extension(filepath))!="he5") {
+  ext<-substr(filepath, nchar(filepath)-3+1, nchar(filepath))
+  if(!tolower(ext)!="he5") {
     warning("File does not have he5 extension, will try to proceed anyway")
   }
 
@@ -77,38 +79,46 @@ PRISMA2rast<-function(filepath){
 
 
   pb$tick()
-  pb$message("Reading file's SWIR cube....")
+  if(verbose) pb$message("Reading SWIR cube....")
 
   img<-list()
   img[["swir"]]<-swir.cube$read()
 
   pb$tick()
-  pb$message("Reading file's VNIR cube....")
+  if(verbose) pb$message("Reading VNIR cube....")
   img[["vnir"]]<-vnir.cube$read()
 
 
   bricks<-list()
   for(n in names(img)){
-    pb$message(paste("Writing", toupper(n), " cube to rasters..."))
     nl<-dim(img[[n]])[[2]]
+    if(verbose) pb$message(paste("Writing ", nl, " bands from ", toupper(n), " cube to raster..."))
 
     pb$tick()
 
-    r<-list()
+    r<-terra::rast()
+    r2 <- terra::rast( nrows=dim(img[[n]])[[1]], ncols=dim(img[[n]])[[3]], nlyrs=nl,
+       xmin=min(lng), xmax=max(lng),
+       ymin=min(lat), ymax=max(lat)
+    )
     for(i in 1:nl){
       pb$tick()
-      r[[as.character(i)]]<- raster::raster(
-        xmn=min(lng), xmx=max(lng),
-        ymn=min(lat), ymx=max(lat),
-        t(img[[n]][,i,]),
-        crs=4326)
+
+      # browser()
+      # terra::values(r2[[1]]) <- 1:terra::ncell(r2) #as.vector(img[[n]][,i,])
+      r <- c(r, terra::rast(
+        t(img[[n]][,i,])
+        ) )
+      if(i>10) break
     }
 
 
     pb$tick()
-    pb$message(paste("Adding", toupper(n), "to stack object (can...."))
+    if(verbose) pb$message(paste("Adding", toupper(n), "to stack object"))
 
-    bricks[[n]]<-raster::brick(r)
+    terra::crs(r) <- "epsg:4326"
+    terra::ext(r) <- c(min(lng), max(lng), min(lat), max(lat) )
+    bricks[[n]]<-r
 
 }
 
