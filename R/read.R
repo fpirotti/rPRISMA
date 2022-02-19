@@ -1,10 +1,12 @@
 #' PRISMA2geotiff
 #'
-#' @param filepath the filepath to HDF PRISMA dataset
-#' @param overwrite Do you want to overwrite automatically any existing Geotiff file?
-#' @param verbose boolean - lot's of messages if True
+#' Exports PRISMA data cube to two geotiff files.
 #'
-#' @return logical TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
+#' @param filepath character: the filepath to HDF PRISMA dataset
+#' @param overwrite logical: do you want to overwrite automatically any existing Geotiff file?
+#' @param verbose logical: lot's of messages if True. Defaults to False.
+#'
+#' @return logical: TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
 #'  XXX.he5 will be  XXX_VNIR.tif and XXX_SWIR.tif
 #' @export
 #'
@@ -30,11 +32,12 @@ PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
 
 
 #' PRISMA2rast
-#' Reads PRISMA data and saves to a terra::rast object
-#' @param filepath text of the filepath to HDF PRISMA dataset
-#' @param verbose boolean - lot's of messages if True
 #'
-#' @return A list object with
+#' Reads PRISMA data and returns a terra::rast object
+#' @param filepath character: text of the filepath to HDF PRISMA dataset
+#' @param verbose logical: lot's of messages if True. Defaults to False.
+#'
+#' @return A list  with
 #' \itemize{
 #'   \item swir - terra::rast object
 #'   \item vnir - terra::rast object
@@ -43,9 +46,9 @@ PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
 #' @export
 #'
 #' @examples
-#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/
-#' PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-#' ### fn <- PRISMA2rast(filepath, verbose=T)
+#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
+#' ### filename<-"PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
+#' ### fn <- PRISMA2rast( file.path(filepath, filename), verbose=T)
 PRISMA2rast<-function(filepath, verbose=F){
 
   if(!file.exists(filepath)){

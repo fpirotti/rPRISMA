@@ -7,18 +7,18 @@
 PRISMA2geotiff(filepath, overwrite = F, verbose = F)
 }
 \arguments{
-\item{filepath}{the filepath to HDF PRISMA dataset}
+\item{filepath}{character: the filepath to HDF PRISMA dataset}
 
-\item{overwrite}{Do you want to overwrite automatically any existing Geotiff file?}
+\item{overwrite}{logical: do you want to overwrite automatically any existing Geotiff file?}
 
-\item{verbose}{boolean - lot's of messages if True}
+\item{verbose}{logical: lot's of messages if True. Defaults to False.}
 }
 \value{
-logical TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
+logical: TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
 XXX.he5 will be  XXX_VNIR.tif and XXX_SWIR.tif
 }
 \description{
-PRISMA2geotiff
+Exports PRISMA data cube to two geotiff files.
 }
 \examples{
 ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
