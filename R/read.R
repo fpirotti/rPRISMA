@@ -114,7 +114,7 @@ PRISMA2rast<-function(filepath, verbose=F){
       r <- c(r, terra::rast(
         t(img[[n]][,i,])
         ), warn=FALSE )
-      if(i>10) break
+
     }
 
 
