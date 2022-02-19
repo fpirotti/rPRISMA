@@ -12,10 +12,10 @@ PRISMA2rast(filepath, verbose = F)
 \item{verbose}{logical: lot's of messages if True. Defaults to False.}
 }
 \value{
-A list  with
+A list of terra::rast objects
 \itemize{
-\item swir - terra::rast object
-\item vnir - terra::rast object
+\item swir data cube
+\item vnir data cube
 }
 }
 \description{

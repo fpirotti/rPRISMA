@@ -1,40 +1,7 @@
-#' PRISMA2geotiff
+#' PRISMA2Dos1cor
 #'
-#' Exports PRISMA data cube to two geotiff files.
-#'
-#' @param filepath character: the filepath to HDF PRISMA dataset
-#' @param overwrite logical: do you want to overwrite automatically any existing Geotiff file?
-#' @param verbose logical: lot's of messages if True. Defaults to False.
-#'
-#' @return logical: TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
-#'  XXX.he5 will be  XXX_VNIR.tif and XXX_SWIR.tif
-#' @export
-#'
-#' @examples
-#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
-#' ### PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-#' ### fn <- PRISMA2geotiff(filepath)
-PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
-  dn<-dirname(filepath)
-  bn<-basename(filepath)
-  bn<-tools::file_path_sans_ext(bn)
-
-  bricks<-PRISMA2rast(filepath, verbose=verbose)
-
-  vnir.out<-file.path(dn, paste(bn, "_VNIR.tif", sep=""))
-  swir.out<-file.path(dn, paste(bn, "_SWIR.tif", sep=""))
-  message("Writing ", vnir.out)
-  terra::writeRaster(bricks[["vnir"]], vnir.out, overwrite=overwrite)
-  message("Writing ", swir.out)
-  terra::writeRaster(bricks[["swir"]], swir.out, overwrite=overwrite)
-}
-
-
-
-#' PRISMA2rast
-#'
-#' Reads PRISMA data and returns a terra::rast object
-#' @param filepath character: text of the filepath to HDF PRISMA dataset
+#' Atmospheric correction of PRISMA data using DOS1 method (see Chavez 1996)
+#' @param image  list: output from
 #' @param verbose logical: lot's of messages if True. Defaults to False.
 #'
 #' @return A list of terra::rast objects
@@ -55,10 +22,8 @@ PRISMA2rast<-function(filepath, verbose=F){
     warning("File does not exist")
     return(NULL)
   }
-
   ext<-substr(filepath, nchar(filepath)-3+1, nchar(filepath))
-  if(tolower(ext)!="he5") {
-
+  if(!tolower(ext)!="he5") {
     warning("File does not have he5 extension, will try to proceed anyway")
   }
 
@@ -102,10 +67,10 @@ PRISMA2rast<-function(filepath, verbose=F){
     pb$tick()
 
     r<-terra::rast()
-    # r2 <- terra::rast( nrows=dim(img[[n]])[[1]], ncols=dim(img[[n]])[[3]], nlyrs=nl,
-    #    xmin=min(lng), xmax=max(lng),
-    #    ymin=min(lat), ymax=max(lat)
-    # )
+    r2 <- terra::rast( nrows=dim(img[[n]])[[1]], ncols=dim(img[[n]])[[3]], nlyrs=nl,
+       xmin=min(lng), xmax=max(lng),
+       ymin=min(lat), ymax=max(lat)
+    )
     for(i in 1:nl){
       pb$tick()
 
@@ -113,7 +78,7 @@ PRISMA2rast<-function(filepath, verbose=F){
       # terra::values(r2[[1]]) <- 1:terra::ncell(r2) #as.vector(img[[n]][,i,])
       r <- c(r, terra::rast(
         t(img[[n]][,i,])
-        ), warn=FALSE )
+        ) )
       if(i>10) break
     }
 
