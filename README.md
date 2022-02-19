@@ -1,5 +1,7 @@
 # rPRISMA  
-
+  <!-- badges: start -->
+  [![R-CMD-check](https://github.com/fpirotti/rPRISMA/workflows/R-CMD-check/badge.svg)](https://github.com/fpirotti/rPRISMA/actions)
+  <!-- badges: end -->
 Converts [PRISMA](https://earth.esa.int/web/eoportal/satellite-missions/p/prisma-hyperspectral){target=_blank} hyperspectral satellite dataset, which is provided in HDF5 format, in GeoTIFF images.
 
 You are welcome to beta-test!
