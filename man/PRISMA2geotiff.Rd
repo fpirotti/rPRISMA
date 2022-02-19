@@ -4,24 +4,30 @@
 \alias{PRISMA2geotiff}
 \title{PRISMA2geotiff}
 \usage{
-PRISMA2geotiff(filepath, overwrite = F, verbose = F)
+PRISMA2geotiff(input, output = NA, overwrite = F, verbose = F)
 }
 \arguments{
-\item{filepath}{character: the filepath to HDF PRISMA dataset}
+\item{input}{character or list: if \emph{character} it is the filepath to HDF PRISMA
+dataset, if it is a \emph{list} it is the output of the PRISMA2rast function, and
+should contain}
 
-\item{overwrite}{logical: do you want to overwrite automatically any existing Geotiff file?}
+\item{output}{character (optional): the filepath and file name to save to.
+Defaults to a geotiff file with the same basename. E.g. /path/XXX.he5 will be
+/path/XXX_VNIR.tif and /path/XXX_SWIR.tif.}
+
+\item{overwrite}{logical: do you want to overwrite automatically any existing
+Geotiff file with the same name?}
 
 \item{verbose}{logical: lot's of messages if True. Defaults to False.}
 }
 \value{
-logical: TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
-XXX.he5 will be  XXX_VNIR.tif and XXX_SWIR.tif
+logical: TRUE on success or FALSE on error.
 }
 \description{
 Exports PRISMA data cube to two geotiff files.
 }
 \examples{
-### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
-### PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-### fn <- PRISMA2geotiff(filepath)
+filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
+filename<-"PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
+# PRISMA2geotiff( input=file.path(filepath, filename), verbose=TRUE)
 }

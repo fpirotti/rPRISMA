@@ -2,25 +2,39 @@
 #'
 #' Exports PRISMA data cube to two geotiff files.
 #'
-#' @param filepath character: the filepath to HDF PRISMA dataset
-#' @param overwrite logical: do you want to overwrite automatically any existing Geotiff file?
+#' @param input character or list: if *character* it is the filepath to HDF PRISMA
+#' dataset, if it is a *list* it is the output of the PRISMA2rast function, and
+#' should contain
+#' @param output character (optional): the filepath and file name to save to.
+#' Defaults to a geotiff file with the same basename. E.g. /path/XXX.he5 will be
+#' /path/XXX_VNIR.tif and /path/XXX_SWIR.tif.
+#' @param overwrite logical: do you want to overwrite automatically any existing
+#' Geotiff file with the same name?
 #' @param verbose logical: lot's of messages if True. Defaults to False.
 #'
-#' @return logical: TRUE on success or FALSE on error. Writes a geotiff file with the same basename. E.g.
-#'  XXX.he5 will be  XXX_VNIR.tif and XXX_SWIR.tif
+#' @return logical: TRUE on success or FALSE on error.
 #' @export
 #'
 #' @examples
-#' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
-#' ### PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-#' ### fn <- PRISMA2geotiff(filepath)
-PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
-  dn<-dirname(filepath)
-  bn<-basename(filepath)
-  bn<-tools::file_path_sans_ext(bn)
+#' filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
+#' filename<-"PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
+#' # PRISMA2geotiff( input=file.path(filepath, filename), verbose=TRUE)
+PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
 
-  bricks<-PRISMA2rast(filepath, verbose=verbose)
+  if(is.character(input)){
+    dn<-dirname(input)
+    bn<-basename(input)
+    bn<-tools::file_path_sans_ext(bn)
 
+    bricks<-PRISMA2rast(input, verbose=verbose)
+  } else if(is.list(input)){
+    dn<-input$filepath
+    bn<-input$filename
+    bricks<- input
+  } else {
+    stop("Input is " , class(input), " only character or list classes can be used...")
+  }
+  # browser()
   vnir.out<-file.path(dn, paste(bn, "_VNIR.tif", sep=""))
   swir.out<-file.path(dn, paste(bn, "_SWIR.tif", sep=""))
   message("Writing ", vnir.out)
@@ -34,7 +48,7 @@ PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
 #' PRISMA2rast
 #'
 #' Reads PRISMA data and returns a terra::rast object
-#' @param filepath character: text of the filepath to HDF PRISMA dataset
+#' @param input character: text of the filepath to HDF PRISMA dataset
 #' @param verbose logical: lot's of messages if True. Defaults to False.
 #'
 #' @return A list of terra::rast objects
@@ -48,21 +62,29 @@ PRISMA2geotiff<-function(filepath, overwrite=F, verbose=F){
 #' @examples
 #' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
 #' ### filename<-"PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
-#' ### fn <- PRISMA2rast( file.path(filepath, filename), verbose=T)
-PRISMA2rast<-function(filepath, verbose=F){
+#' ### fn <- PRISMA2rast( input=file.path(filepath, filename), verbose=TRUE)
+PRISMA2rast<-function(input, verbose=F){
 
-  if(!file.exists(filepath)){
+  if(!file.exists(input)){
     warning("File does not exist")
     return(NULL)
   }
 
-  ext<-substr(filepath, nchar(filepath)-3+1, nchar(filepath))
+  ext<-substr(input, nchar(input)-3+1, nchar(input))
   if(tolower(ext)!="he5") {
 
     warning("File does not have he5 extension, will try to proceed anyway")
   }
 
-  op<-hdf5r::H5File$new(filepath)
+  dn<-dirname(input)
+  bn<-basename(input)
+  bn<-tools::file_path_sans_ext(bn)
+
+  bricks<-list()
+  bricks[['filepath']]<-dn
+  bricks[['filename']]<-bn
+
+  op<-hdf5r::H5File$new(input)
 
   pp <- op$ls(recursive=TRUE)
   if(nrow(pp)==0){
@@ -76,50 +98,50 @@ PRISMA2rast<-function(filepath, verbose=F){
   lng<-geocod.lng$read()
 
 
-  swir.cube<-op$open("HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/SWIR_Cube")
-  vnir.cube<-op$open("HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/VNIR_Cube")
+  cube<-list()
+  cube[["swir"]]<-op$open("HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/SWIR_Cube")
+  cube[["vnir"]]<-op$open("HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/VNIR_Cube")
+  cube[["pan"]]<-op$open("HDFEOS/SWATHS/PRS_L2D_PCO/Data Fields/Cube")
 
   pb <- progress::progress_bar$new(format = "[:bar] :current/:total (:percent)",
-                                   total = swir.cube$dims[[2]] + vnir.cube$dims[[2]]  + 10 )
-
+                                   total = cube[["swir"]]$dims[[2]] +
+                                     cube[["vnir"]]$dims[[2]]  + 10 )
 
   pb$tick()
-  if(verbose) pb$message("Reading SWIR cube....")
 
   img<-list()
-  img[["swir"]]<-swir.cube$read()
+  if(verbose) pb$message("Reading Panchromatic cube....")
+  img[["pan"]] <- cube[["pan"]]$read()
 
-  pb$tick()
-  if(verbose) pb$message("Reading VNIR cube....")
-  img[["vnir"]]<-vnir.cube$read()
+  bricks[['panchromatic']] <- terra::rast(
+    t(img[["pan"]])
+  )
 
+  terra::crs(bricks[['panchromatic']]) <- "epsg:4326"
+  terra::ext(bricks[['panchromatic']]) <- c(min(lng), max(lng), min(lat), max(lat) )
 
-  bricks<-list()
-  for(n in names(img)){
-    nl<-dim(img[[n]])[[2]]
-    if(verbose) pb$message(paste("Writing ", nl, " bands from ", toupper(n), " cube to raster..."))
+  for(n in c("swir", "vnir")){
+
+    if(verbose) pb$message(paste("Reading ", toupper(n) , " cube...."))
+    img[[n]]<-cube[[n]]$read()
 
     pb$tick()
 
+    nl<-dim(img[[n]])[[2]]
+
+    if(verbose) pb$message(paste("Writing ", nl, " bands from ", toupper(n), " cube to raster..."))
+
+
     r<-terra::rast()
-    # r2 <- terra::rast( nrows=dim(img[[n]])[[1]], ncols=dim(img[[n]])[[3]], nlyrs=nl,
-    #    xmin=min(lng), xmax=max(lng),
-    #    ymin=min(lat), ymax=max(lat)
-    # )
     for(i in 1:nl){
       pb$tick()
-
-      # browser()
-      # terra::values(r2[[1]]) <- 1:terra::ncell(r2) #as.vector(img[[n]][,i,])
       r <- c(r, terra::rast(
         t(img[[n]][,i,])
         ), warn=FALSE )
 
     }
 
-
-    pb$tick()
-    if(verbose) pb$message(paste("Adding", toupper(n), "to stack object"))
+    if(verbose) pb$message(paste("Adding", toupper(n), " to stack object"))
 
     terra::crs(r) <- "epsg:4326"
     terra::ext(r) <- c(min(lng), max(lng), min(lat), max(lat) )
