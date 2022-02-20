@@ -15,7 +15,6 @@
 #' @return logical: TRUE on success or FALSE on error.
 #' @export
 #'
-#' @importFrom utils unzip
 #' @importFrom terra rast
 #'
 #' @examples
@@ -32,10 +31,12 @@ PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
     bn<-tools::file_path_sans_ext(bn)
 
     if(ext=="zip"){
-      if(verbose) message("Unzipping file...")
-      ll <- utils::unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
-      utils::unzip(input, overwrite = overwrite, exdir = dn)
-      input <- file.path(dn,ll$Name)
+      # if(verbose) message("Unzipping file...")
+      message("Sorry, you have to unzip your file first")
+      return(NULL)
+      # ll <- utils::unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
+      # utils::unzip(input, overwrite = overwrite, exdir = dn)
+      # input <- file.path(dn,ll$Name)
     }
     bricks<-PRISMA2rast(input, verbose=verbose)
   } else if(is.list(input)){
@@ -95,10 +96,12 @@ PRISMA2rast<-function(input, verbose=F){
   bn<-tools::file_path_sans_ext(bn)
 
   if(ext=="zip"){
-    if(verbose) message("Unzipping file...")
-    ll <- utils::unzip(input,  exdir = dn, list=TRUE)
-    input <- file.path(dn,ll$Name)
-    ext<-substr(input, nchar(input)-3+1, nchar(input))
+    # if(verbose) message("Unzipping file...")
+    message("Sorry, you have to unzip your file first")
+    return(NULL)
+    # ll <- utils::unzip(input,  exdir = dn, list=TRUE)
+    # input <- file.path(dn,ll$Name)
+    # ext<-substr(input, nchar(input)-3+1, nchar(input))
   }
 
   if(tolower(ext)!="he5") {
