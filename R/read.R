@@ -22,10 +22,17 @@
 PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
 
   if(is.character(input)){
+
+    ext<-substr(input, nchar(input)-3+1, nchar(input))
     dn<-dirname(input)
     bn<-basename(input)
     bn<-tools::file_path_sans_ext(bn)
 
+    if(ext=="zip"){
+      if(verbose) message("Unzipping file...")
+      ll <- unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
+      input <- file.path(dn,ll$Name)
+    }
     bricks<-PRISMA2rast(input, verbose=verbose)
   } else if(is.list(input)){
     dn<-input$filepath
@@ -38,11 +45,11 @@ PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
   vnir.out<-file.path(dn, paste(bn, "_VNIR.tif", sep=""))
   swir.out<-file.path(dn, paste(bn, "_SWIR.tif", sep=""))
   pan.out<-file.path(dn, paste(bn, "_PAN.tif", sep=""))
-  message("Writing ", pan.out)
+  if(verbose) message("Writing ", pan.out)
   terra::writeRaster(bricks[["panchromatic"]], pan.out, overwrite=overwrite)
-  message("Writing ", vnir.out)
+  if(verbose) message("Writing ", vnir.out)
   terra::writeRaster(bricks[["vnir"]], vnir.out, overwrite=overwrite)
-  message("Writing ", swir.out)
+  if(verbose) message("Writing ", swir.out)
   terra::writeRaster(bricks[["swir"]], swir.out, overwrite=overwrite)
 }
 
@@ -74,14 +81,24 @@ PRISMA2rast<-function(input, verbose=F){
   }
 
   ext<-substr(input, nchar(input)-3+1, nchar(input))
-  if(tolower(ext)!="he5") {
-
-    warning("File does not have he5 extension, will try to proceed anyway")
-  }
 
   dn<-dirname(input)
   bn<-basename(input)
   bn<-tools::file_path_sans_ext(bn)
+
+  if(ext=="zip"){
+    if(verbose) message("Unzipping file...")
+    ll <- unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
+    input <- file.path(dn,ll$Name)
+
+    ext<-substr(input, nchar(input)-3+1, nchar(input))
+
+  }
+
+  if(tolower(ext)!="he5") {
+    warning("File does not have he5 extension, will try to proceed anyway")
+  }
+
 
   bricks<-list()
   bricks[['filepath']]<-dn

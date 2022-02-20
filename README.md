@@ -19,13 +19,13 @@ NB: terra library version >1.5 is required
 
 ## Usage
 
-    PRISMA2geotiff("path-to-HDF5-file.he5", overwrite=T/F) 
+    PRISMA2geotiff("path-to-HDF5-file.he5/zip", overwrite=T/F) 
 
 will write two files, one for the VNIR cube and SWIR  cube, repsectively with the same basename as the original file, substituting .he5 extension with _VNIR.tif and _SWIR.tif.   
 
-    PRISMA2rast("path-to-HDF5-file.he5")  
+    PRISMA2rast("path-to-HDF5-file.he5/zip")  
     
-will provide you with a list with SWIR, VNIR and panchromatic raster as terra::rast object.
+will provide you with a list object containing SWIR, VNIR and panchromatic raster as terra::rast object and metadata.
 
 ## Installation    
 
