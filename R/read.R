@@ -31,12 +31,12 @@ PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
     bn<-tools::file_path_sans_ext(bn)
 
     if(ext=="zip"){
-      # if(verbose) message("Unzipping file...")
-      message("Sorry, you have to unzip your file first")
-      return(NULL)
-      # ll <- utils::unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
-      # utils::unzip(input, overwrite = overwrite, exdir = dn)
-      # input <- file.path(dn,ll$Name)
+      if(verbose) message("Unzipping file...")
+      # message("Sorry, you have to unzip your file first")
+      # return(NULL)
+      ll <- utils::unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
+      utils::unzip(input, overwrite = overwrite, exdir = dn)
+      input <- file.path(dn,ll$Name)
     }
     bricks<-PRISMA2rast(input, verbose=verbose)
   } else if(is.list(input)){
