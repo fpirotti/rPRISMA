@@ -96,11 +96,11 @@ PRISMA2rast<-function(input, verbose=F){
   bn<-tools::file_path_sans_ext(bn)
 
   if(ext=="zip"){
-    # if(verbose) message("Unzipping file...")
-    message("Sorry, you have to unzip your file first")
+    if(verbose) message("Unzipping file...")
+    # message("Sorry, you have to unzip your file first")
     # return(NULL)
     ll <- utils::unzip(input,  exdir = dn, list=TRUE)
-    # input <- file.path(dn,ll$Name)
+    input <- file.path(dn,ll$Name)
     # ext<-substr(input, nchar(input)-3+1, nchar(input))
   }
 
