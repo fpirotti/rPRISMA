@@ -15,6 +15,9 @@
 #' @return logical: TRUE on success or FALSE on error.
 #' @export
 #'
+#' @importFrom utils unzip
+#' @importFrom terra rast
+#'
 #' @examples
 #' filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
 #' filename<-"PRS_L2D_STD_20200418101701_20200418101706_0001.he5"
@@ -68,6 +71,9 @@ PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
 #'   \item swir data cube
 #'   \item vnir data cube
 #' }
+#'
+#' @importFrom utils unzip
+#' @importFrom terra rast
 #'
 #' @export
 #'

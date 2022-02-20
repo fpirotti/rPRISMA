@@ -11,7 +11,6 @@
 #'   \item vnir data cube
 #' }
 #'
-#' @export
 #'
 #' @examples
 #' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"

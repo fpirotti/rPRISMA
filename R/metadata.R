@@ -7,7 +7,6 @@
 #'
 #' @return A numeric vector (length=4; order= xmin, xmax, ymin, ymax)
 #'
-#' @export
 #'
 #' @examples
 #' ### filepath<-"/archivio/shared/geodati/raster/OPTICAL/PRISMA/"
