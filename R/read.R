@@ -31,6 +31,7 @@ PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
     if(ext=="zip"){
       if(verbose) message("Unzipping file...")
       ll <- utils::unzip(input, overwrite = overwrite, exdir = dn, list=TRUE)
+      utils::unzip(input, overwrite = overwrite, exdir = dn)
       input <- file.path(dn,ll$Name)
     }
     bricks<-PRISMA2rast(input, verbose=verbose)
@@ -45,6 +46,7 @@ PRISMA2geotiff<-function(input, output= NA, overwrite=F, verbose=F){
   vnir.out<-file.path(dn, paste(bn, "_VNIR.tif", sep=""))
   swir.out<-file.path(dn, paste(bn, "_SWIR.tif", sep=""))
   pan.out<-file.path(dn, paste(bn, "_PAN.tif", sep=""))
+
   if(verbose) message("Writing ", pan.out)
   terra::writeRaster(bricks[["panchromatic"]], pan.out, overwrite=overwrite)
   if(verbose) message("Writing ", vnir.out)
@@ -90,13 +92,11 @@ PRISMA2rast<-function(input, verbose=F){
     if(verbose) message("Unzipping file...")
     ll <- utils::unzip(input,  exdir = dn, list=TRUE)
     input <- file.path(dn,ll$Name)
-
     ext<-substr(input, nchar(input)-3+1, nchar(input))
-
   }
 
   if(tolower(ext)!="he5") {
-    warning("File does not have he5 extension, will try to proceed anyway")
+    message("File does not have he5 extension, will try to proceed anyway")
   }
 
 
@@ -131,6 +131,7 @@ PRISMA2rast<-function(input, verbose=F){
 
   img<-list()
   if(verbose) pb$message("Reading Panchromatic cube....")
+  # browser()
   img[["pan"]] <- cube[["pan"]]$read()
 
   bricks[['panchromatic']] <- terra::rast(
